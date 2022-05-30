@@ -55,7 +55,6 @@ class DbService {
     }
     async getUserPoints(username) {
         try {
-            console.log(`Retreiving points for: ${username}`)
             const response = await new Promise((resolve, reject) => {
                 const query = `SELECT * FROM users WHERE name = '${username}';`
                 connection.query(query, (err, results) => {
@@ -80,10 +79,8 @@ class DbService {
             })
             // If it exists then it does nothing and returns an error.  Otherwise it creates the new user.
             if (alreadyExists.length > 0) {
-                console.log(`Error: User ${username} already exists.  No action taken.`)
                 return `Error: User ${username} already exists.  No action taken.`
             } else {
-                console.log(`${username} not found.  Creating entry.`)
                 const response = await new Promise((resolve, reject) => {
                     const query = `
                             INSERT INTO users(name,points)
@@ -112,9 +109,9 @@ class DbService {
             return response;
         } catch (err) {console.log(err)}
     }
-    async batchTest(activeUserList) {
+    async batchTest(list) {
         try {
-
+            console.log(list)
         } catch (err) {console.log(err)}
     }
 }

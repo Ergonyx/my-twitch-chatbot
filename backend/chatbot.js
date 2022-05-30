@@ -30,7 +30,7 @@ const client = new tmi.Client({
     username: `${process.env.TTV_USERNAME}`,
     password: `oauth:${process.env.TTV_ACCESS}`,
   },
-  channels: [`${process.env.TTV_CHANNEL}`, `xQc`, `dreamwastaken`, `aceu`, `summit1g`, `MOONMOON`, `yourragegaming`, `Darleeng`, `yayster`, `Topsonous`, `shroud`, `Flight23white`, `Vinesauce`, `Maximilian_DOOD`, `ShahZaM`, `TinaKitten`, `DiazBiffle`, `ChilledChaos`, `EsfandTV`, `PENTA`, `Scarra`, `scump`, `nl_Kripp`, `PROD`, `Foolish_Gamers`, `roflgator`, `sneakylol`, `iiTzTimmy`, `snuffy`, `Snip3down`, `AceTsuu`, `koil`, `sashagrey`, `iateyourpie`, `susu_jpg`, `TeeGrizzley`, `Natsumiii`, `robcdee`, `Saintone`, `AdrianaChechik_`, `Albralelie`, `Calebhart42`, `Murda`, `DatModz`, `PikameeAmano`, `supertf`, `Tectone`, `Dropped`, `hJune`, `OhTofu`, `Gosu`, `Ac7ionMan`, `robinsongz`, `Skermz`, `Sequisha`, `LilAggy`, `Spaceboy`, `jorbs`, `FrtingGlitter`, `sunsetgaiaASMR`, `Sanchovies`, `Quantum`, `HecticTKS`, `Aurateur`, `dakotaz`, `supcaitlin`, `Rogue`, `KatFires`, `BobRoss`, `Kenji`, `CrReaM`, `cdewx`, `Ohmwrecker`, `Lacari`, `physicalgamerz`, `Tigz`, `KarasMai`, `derrekow`, `CDNThe3rd`, `Rubee`, `DizzyKitten`, `Euriece`, `SunBaconRelaxer`, `Payo`, `Captainflowers22`, `itsHafu`, `BigIraq`, `Hotashi`, `Shotzzy`, `ash`, `Terroriser`, `Noko`, `Biotoxz_`, `Lourlo`, `keanelol`, `faxuty`, `Beaulo`, `LunaOni`, `BikeMan`, `Kxpture`, `Xlice`, `Jukeyz`, `tcTekk`, `Diddly`, `XenosysVex`, `eaJParkOfficial`], // NOTE: This is an array of channels you want the bot to join.
+  channels: [`${process.env.TTV_CHANNEL}`, `aceu`], // NOTE: This is an array of channels you want the bot to join.
 });
 
 // Connect to specified channel using the settings from config and log any errors to the console.
@@ -154,6 +154,11 @@ client.on("message", (channel, tags, message, self) => {
 // Interval to give active chatters 10 points every 10 minutes.
 pointUpdater = setInterval(() => {
   // Cycle through active users and add points.
+  axios.patch('http://localhost:5000/v1/points/batch', {activeUsers})
+  .then(response => {
+    console.log(response.config.data)
+  }).catch(err => console.log(err))
+
   activeUsers.forEach((activeUser) => {
     axios.get('http://localhost:5000/v1/points/lookup/' + activeUser)
       .then(response => {

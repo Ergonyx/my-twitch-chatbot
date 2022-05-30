@@ -26,7 +26,6 @@ app.listen(process.env.EXPRESS_PORT, () => {
 // CREATE
 app.post('/v1/users/add/:username', (req, res) => {
 // app.post('/addNewUser/:username', (req, res) => {
-    console.log("Creating new user...")
     const db = dbService.getDbServiceInstance();
     const result = db.addNewUser(req.params.username)
     result
@@ -59,9 +58,20 @@ app.get('/v1/points/lookup/:username', (req, res) => {
 
 // UPDATE
 app.patch('/v1/points/add/:username', (req, res) => {
-    console.log(`Increasing points for ${req.params.username}.`)
     const db = dbService.getDbServiceInstance();
     const result = db.addPoints(req.params.username)
+    result
+    .then(data => {
+        res.send(data)
+    })
+    .catch(err => console.log(err))
+})
+
+app.patch('/v1/points/batch', (req, res) => {
+    console.log("Doing batch update.")
+    console.log(req.body)
+    const db = dbService.getDbServiceInstance();
+    const result = db.batchTest(req.body.activeUsers)
     result
     .then(data => {
         res.send(data)
