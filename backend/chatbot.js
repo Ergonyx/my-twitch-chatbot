@@ -13,6 +13,7 @@ const axios = require("axios");
 // NOTE: These seem to just appear. Honestly not sure wtf is going on here.
 const { raw } = require("tmi.js/lib/commands");
 const { response } = require("express");
+const { Console } = require("console");
 
 // Set global array to add active users to for point tracking and other metrics.
 activeUsers = [];
@@ -59,14 +60,14 @@ client.on("message", (channel, tags, message, self) => {
     chatParse = chatMessage.split(" ");
     if (chatParse[0] === "!help") {
       if (!chatParse[1]) {
-        client.say(
+        console.log(
           channel,
           `@${tags["display-name"]} !Commands will provide you a list of commands available to you.  You may use "!Help <command>" for help on individual commands.  Alternatively, you may also visit http://ergonyx.ca/chatcommands for documentation on commands.`
         );
       } else {
         switch (chatParse[1]) {
           case "commands":
-            client.say(channel, `@${tags["display-name"]} `);
+            console.log(channel, `@${tags["display-name"]} `);
             break;
           case "top10":
             // Connect to SQL server
@@ -80,7 +81,7 @@ client.on("message", (channel, tags, message, self) => {
               .catch(error => console.log(error))
             break;
           default:
-            client.say(
+            console.log(
               channel,
               `@${
                 tags["display-name"]
@@ -92,7 +93,7 @@ client.on("message", (channel, tags, message, self) => {
     }
 
     if (chatParse[0] === "!commands") {
-      client.say(
+      console.log(
         channel,
         `@${tags.username} Available commands are !Help, !Commands, !Points`
       );
@@ -105,9 +106,9 @@ client.on("message", (channel, tags, message, self) => {
         axios.get("http://localhost:5000/v1/points/lookup/" + query)
         .then(response => {
           if (response['data'].length > 0) {
-            client.say(channel, `@${tags['display-name']}: ${response.data[0].name} has ${response.data[0].points} points.`)
+            console.log(channel, `@${tags['display-name']}: ${response.data[0].name} has ${response.data[0].points} points.`)
           } else {
-            client.say(channel, `@${tags['display-name']}: ${query} doesn't appear to have any points yet.`)
+            console.log(channel, `@${tags['display-name']}: ${query} doesn't appear to have any points yet.`)
           }
         }).catch(err => {console.log(err)})
       } else {
@@ -115,15 +116,15 @@ client.on("message", (channel, tags, message, self) => {
         axios.get("http://localhost:5000/v1/points/lookup/" + tags.username)
         .then(response => {
           if (response['data'].length > 0) {
-            client.say(channel, `@${tags['display-name']}: You have ${response.data[0].points} points.`)
+            console.log(channel, `@${tags['display-name']}: You have ${response.data[0].points} points.`)
           } else {
-            client.say(channel, `@${tags['display-name']}: You don't have any points yet.  You earn points by participating in the chat.`)
+            console.log(channel, `@${tags['display-name']}: You don't have any points yet.  You earn points by participating in the chat.`)
           }
         }).catch(err => {console.log(err)})
       }
     }
     if (chatParse[0] === "!emote") {
-      client.say(channel, `/me emotes and stuff.`)
+      console.log(channel, `/me emotes and stuff.`)
     }
 
     // Big RPG community commands in here.  Maybe consider making this into a module and importing it from a separate file.
@@ -160,10 +161,11 @@ pointUpdater = setInterval(() => {
     axios.get('http://localhost:5000/v1/points/lookup/' + activeUser)
       .then(response => {
         if (response['data'].length > 0) {
+          console.log(`+10 points: ${response.data[0].name} (${response.data[0].points + 10})`)
           // If user exists, add 10 points to their existing points.
           axios.patch('http://localhost:5000/v1/points/add/' + activeUser)
           .then(response => {
-            console.log(`+10 points:${response.data[0].name} (${response.data[0].points + 10})`)
+            
           }).catch(err => console.log(err))
         } else {
           // Otherwise, insert them into the table and give them 10 points.
