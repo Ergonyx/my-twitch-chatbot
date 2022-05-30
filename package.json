@@ -1,0 +1,27 @@
+{
+  "name": "my-twitch-chatbot",
+  "version": "1.0.0",
+  "description": "Custome chatbot for my Twitch channel",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ergonyx/my-twitch-chatbot.git"
+  },
+  "author": "Alex Richardson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ergonyx/my-twitch-chatbot/issues"
+  },
+  "homepage": "https://github.com/Ergonyx/my-twitch-chatbot#readme",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.1",
+    "mysql": "^2.18.1",
+    "tmi.js": "^1.8.5"
+  }
+}
