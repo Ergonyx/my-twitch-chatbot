@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: false }));
 
 const dbService = require('./dbService')
 
-// These seemto just appear. Honestly not sure wtf is going on here.
+// These seem to just appear. Honestly not sure wtf is going on here.
 const { raw } = require("tmi.js/lib/commands");
 const { response } = require("express");
 
@@ -22,12 +22,10 @@ app.listen(process.env.EXPRESS_PORT, () => {
 })
 
 // All the Database things.
-// FIXME: These endpoints are terrible and could be much better organized.
+
 // CREATE
-app.post('/insert', (req, res) => {
-    
-})
-app.post('/addNewUser/:username', (req, res) => {
+app.post('/v1/users/add/:username', (req, res) => {
+// app.post('/addNewUser/:username', (req, res) => {
     console.log("Creating new user...")
     const db = dbService.getDbServiceInstance();
     const result = db.addNewUser(req.params.username)
@@ -39,16 +37,7 @@ app.post('/addNewUser/:username', (req, res) => {
 })
 
 // READ
-app.get('/getAll', (req, res) => {
-    const db = dbService.getDbServiceInstance();
-    const result = db.getAllData()
-    result
-    .then(data => {
-        res.send(data)
-    })
-    .catch(err => console.log(err))
-})
-app.get('/getTop10', (req, res) => {
+app.get('/v1/points/lookup/top10', (req, res) => {
     const db = dbService.getDbServiceInstance();
     const result = db.getTop10()
     result
@@ -57,15 +46,17 @@ app.get('/getTop10', (req, res) => {
     })
     .catch(err => console.log(err))
 })
-app.get('/getMyPoints/:username', (req, res) => {
+
+app.get('/v1/points/lookup/:username', (req, res) => {
     const db = dbService.getDbServiceInstance();
-    const result = db.getMyPoints(req.params.username)
+    const result = db.getUserPoints(req.params.username)
     result
     .then(data => {
         res.send(data)
     })
     .catch(err => console.log(err))
 })
+
 // UPDATE
 app.patch('/v1/points/add/:username', (req, res) => {
     console.log(`Increasing points for ${req.params.username}.`)

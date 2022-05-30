@@ -70,7 +70,7 @@ client.on("message", (channel, tags, message, self) => {
             break;
           case "top10":
             // Connect to SQL server
-            axios.get("http://localhost:5000/getTop10")
+            axios.get("http://localhost:5000/v1/points/lookup/top10")
               .then(response => {
                 console.log(response.data)
                 response['data'].forEach((el) => {
@@ -102,7 +102,7 @@ client.on("message", (channel, tags, message, self) => {
       if (chatParse[1]) {
         query = chatParse[1].toLowerCase();
         // This will let users look up the points for other users.
-        axios.get("http://localhost:5000/getMyPoints/" + query)
+        axios.get("http://localhost:5000/v1/points/lookup/" + query)
         .then(response => {
           if (response['data'].length > 0) {
             client.say(channel, `@${tags['display-name']}: ${response.data[0].name} has ${response.data[0].points} points.`)
@@ -112,7 +112,7 @@ client.on("message", (channel, tags, message, self) => {
         }).catch(err => {console.log(err)})
       } else {
         // Look up users points.
-        axios.get("http://localhost:5000/getMyPoints/" + tags.username)
+        axios.get("http://localhost:5000/v1/points/lookup/" + tags.username)
         .then(response => {
           if (response['data'].length > 0) {
             client.say(channel, `@${tags['display-name']}: You have ${response.data[0].points} points.`)
@@ -155,65 +155,26 @@ client.on("message", (channel, tags, message, self) => {
 
 // Interval to give active chatters 10 points every 10 minutes.
 pointUpdater = setInterval(() => {
-  // Load userPoints.json file so new points can be added.
-  // rawdata = fs.readFileSync("./userPoints.json");
-  // userPoints = JSON.parse(rawdata);
-
   // Cycle through active users and add points.
   activeUsers.forEach((activeUser) => {
-    axios.get('http://localhost:5000/getMyPoints/' + activeUser)
+    axios.get('http://localhost:5000/v1/points/lookup/' + activeUser)
       .then(response => {
-        console.log(`Searching for ${activeUser}`)
         if (response['data'].length > 0) {
           // If user exists, add 10 points to their existing points.
-          console.log(`Found ${response.data[0].name} with ${response.data[0].points} points.`)
           axios.patch('http://localhost:5000/v1/points/add/' + activeUser)
           .then(response => {
-            console.log(`Database response: ${response.data.message}`)
+            console.log(`+10 points:${response.data[0].name} (${response.data[0].points + 10})`)
           }).catch(err => console.log(err))
         } else {
           // Otherwise, insert them into the table and give them 10 points.
-          console.log(`${activeUser} not found.  Creating new entry.`)
           // NOTE: I'm fairly certain this POST is done badly and has room for improvement.  Just can't see it yet.
-          axios.post('http://localhost:5000/addNewUser/' + activeUser)
+          axios.post('http://localhost:5000/v1/users/add/' + activeUser)
             .then(response => {
               console.log(`User ${activeUser} created.  User ID: ${response.data.insertId}`)
             }).catch(err => console.log(err))
         }
       }).catch(err => console.log(err))
-
-
-    // userIndex = -1
-    // for (let i = 0; i < userPoints.length; i++) {
-    //   if (activeUser === userPoints[i].username) {
-    //     var userIndex = i;
-    //   }
-    // }
-    // if (userIndex >= 0) {
-    //   userPoints[userIndex].points += 10;
-    //   updateUserPoints();
-    // } else {
-    //   // add user to the database with default object.
-    //   userPoints.push({ username: activeUser, points: 10 });
-    //   updateUserPoints();
-    // }
   });
   // Clear active users array for the next round.
   activeUsers = [];
 }, 15000);
-
-// FUNCTIONS
-
-const updateUserPoints = () => {
-  newData = JSON.stringify(userPoints);
-  fs.writeFileSync("./userPoints.json", newData);
-  userIndex = -1;
-};
-
-const searchForUser = (user) => {
-  rawData = fs.readFileSync("./userPoints.json");
-  userPoints = JSON.parse(rawData);
-
-  result = userPoints.find((element) => element.username === user);
-  return result;
-};

@@ -24,7 +24,7 @@ class DbService {
     }
     async getAllData() {
         try {
-            console.log("Attempting to query database.")
+            console.log("Getting ALL data.")
             const response = await new Promise((resolve, reject) => {
                 const query = "SELECT * FROM users;"
                 connection.query(query, (err, results) => {
@@ -53,7 +53,7 @@ class DbService {
             console.log(err)
         }
     }
-    async getMyPoints(username) {
+    async getUserPoints(username) {
         try {
             console.log(`Retreiving points for: ${username}`)
             const response = await new Promise((resolve, reject) => {
