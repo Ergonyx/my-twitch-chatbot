@@ -3,8 +3,6 @@
 require("dotenv").config();
 // Use the Twich Messenger Interface
 const tmi = require("tmi.js");
-// Use the file system (fs) api to store data in a file.
-const fs = require("fs");
 // Axios for http requests (need to become more familiar with NodeJS methods of doing this.)
 const axios = require("axios");
 
@@ -13,10 +11,10 @@ const axios = require("axios");
 // NOTE: These seem to just appear. Honestly not sure wtf is going on here.
 const { raw } = require("tmi.js/lib/commands");
 const { response } = require("express");
-const { Console } = require("console");
 
 // Set global array to add active users to for point tracking and other metrics.
 activeUsers = [];
+messageCount = 0;
 
 // NOTE: Set up the Twitch Messaging Interface package to connect to my bot account.
 // Setup connection config
@@ -32,13 +30,16 @@ const client = new tmi.Client({
     username: `${process.env.TTV_USERNAME}`,
     password: `oauth:${process.env.TTV_ACCESS}`,
   },
-  channels: [`${process.env.TTV_CHANNEL}`], // NOTE: This is an array of channels you want the bot to join.
+  channels: [`${process.env.TTV_CHANNEL}`, `xQc`, `dreamwastaken`, `aceu`, `summit1g`, `MOONMOON`, `yourragegaming`, `Darleeng`, `yayster`, `Topsonous`, `shroud`, `Flight23white`, `Vinesauce`, `Maximilian_DOOD`, `ShahZaM`, `TinaKitten`, `DiazBiffle`, `ChilledChaos`, `EsfandTV`, `PENTA`, `Scarra`, `scump`, `nl_Kripp`, `PROD`, `Foolish_Gamers`, `roflgator`, `sneakylol`, `iiTzTimmy`, `snuffy`, `Snip3down`, `AceTsuu`, `koil`, `sashagrey`, `iateyourpie`, `susu_jpg`, `TeeGrizzley`, `Natsumiii`, `robcdee`, `Saintone`, `AdrianaChechik_`, `Albralelie`, `Calebhart42`, `Murda`, `DatModz`, `PikameeAmano`, `supertf`, `Tectone`, `Dropped`, `hJune`, `OhTofu`, `Gosu`, `Ac7ionMan`, `robinsongz`, `Skermz`, `Sequisha`, `LilAggy`, `Spaceboy`, `jorbs`, `FrtingGlitter`, `sunsetgaiaASMR`, `Sanchovies`, `Quantum`, `HecticTKS`, `Aurateur`, `dakotaz`, `supcaitlin`, `Rogue`, `KatFires`, `BobRoss`, `Kenji`, `CrReaM`, `cdewx`, `Ohmwrecker`, `Lacari`, `physicalgamerz`, `Tigz`, `KarasMai`, `derrekow`, `CDNThe3rd`, `Rubee`, `DizzyKitten`, `Euriece`, `SunBaconRelaxer`, `Payo`, `Captainflowers22`, `itsHafu`, `BigIraq`, `Hotashi`, `Shotzzy`, `ash`, `Terroriser`, `Noko`, `Biotoxz_`, `Lourlo`, `keanelol`, `faxuty`, `Beaulo`, `LunaOni`, `BikeMan`, `Kxpture`, `Xlice`, `Jukeyz`, `tcTekk`, `Diddly`, `XenosysVex`, `eaJParkOfficial`], // NOTE: This is an array of channels you want the bot to join.
 });
 
 // Connect to specified channel using the settings from config and log any errors to the console.
 // TODO: Have errors get logged to an actual file.
 client.connect().catch(console.error);
-
+msgsPerMin = setInterval(() => {
+  client.say('ergonyx', `${messageCount}`)
+  messageCount = 0
+}, 60000);
 // Listen for messages sent by users in the specified channel(s)
 client.on("message", (channel, tags, message, self) => {
   // Prevent the bot from responding to it's own messages.
@@ -48,7 +49,7 @@ client.on("message", (channel, tags, message, self) => {
   if (activeUsers.indexOf(tags.username) < 0) {
     activeUsers.push(tags.username);
   }
-
+  messageCount++
   // Create a switch statement with some possible commands and their outputs
   // The input shall be converted to lowercase first
   // The outputs shall be in the chats
@@ -123,12 +124,8 @@ client.on("message", (channel, tags, message, self) => {
         }).catch(err => {console.log(err)})
       }
     }
-    if (chatParse[0] === "!emote") {
-      console.log(channel, `/me emotes and stuff.`)
-    }
 
     // Big RPG community commands in here.  Maybe consider making this into a module and importing it from a separate file.
-
     if (chatParse[0] === "!rpg") {
       switch (chatParse[1]) {
         case "help":
@@ -161,7 +158,6 @@ pointUpdater = setInterval(() => {
     axios.get('http://localhost:5000/v1/points/lookup/' + activeUser)
       .then(response => {
         if (response['data'].length > 0) {
-          console.log(`+10 points: ${response.data[0].name} (${response.data[0].points + 10})`)
           // If user exists, add 10 points to their existing points.
           axios.patch('http://localhost:5000/v1/points/add/' + activeUser)
           .then(response => {
@@ -172,11 +168,11 @@ pointUpdater = setInterval(() => {
           // NOTE: I'm fairly certain this POST is done badly and has room for improvement.  Just can't see it yet.
           axios.post('http://localhost:5000/v1/users/add/' + activeUser)
             .then(response => {
-              console.log(`User ${activeUser} created.  User ID: ${response.data.insertId}`)
+              
             }).catch(err => console.log(err))
         }
       }).catch(err => console.log(err))
   });
   // Clear active users array for the next round.
   activeUsers = [];
-}, 15000);
+}, 60000);

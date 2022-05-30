@@ -112,6 +112,11 @@ class DbService {
             return response;
         } catch (err) {console.log(err)}
     }
+    async batchTest(activeUserList) {
+        try {
+
+        } catch (err) {console.log(err)}
+    }
 }
 
 module.exports = DbService;
