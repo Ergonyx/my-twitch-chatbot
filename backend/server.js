@@ -69,7 +69,7 @@ app.patch('/v1/points/add/:username', (req, res) => {
 
 app.patch('/v1/points/batch', (req, res) => {
     console.log("Doing batch update.")
-    console.log(req.body)
+    // console.log(req.query, req.body)
     const db = dbService.getDbServiceInstance();
     const result = db.batchTest(req.body.activeUsers)
     result

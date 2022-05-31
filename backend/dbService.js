@@ -109,9 +109,62 @@ class DbService {
             return response;
         } catch (err) {console.log(err)}
     }
+    // NOTE: Based on my reading about doing multi-row statements and the benchmarks I've seen I've decided that this will likely send up to 50 rows (max) at a time as that achieves similar numbers to doing 10000 at a time.
     async batchTest(list) {
         try {
-            console.log(list)
+            // scope variables
+            let updateTheseQuery = []
+            let insertTheseQuery = []
+
+            for (let i = 0; i < list.length; i++) {
+                const el = list[i];
+                const response = await new Promise((resolve, reject) => {
+                    const query = `SELECT * FROM users WHERE name = "${el}"`
+                    connection.query(query, (err, results) => {
+                        if (err) reject(new Error(err.message))
+                        resolve(results)
+                    })
+                })
+                if (response.length > 0) {
+                    // updateTheseQuery += `UPDATE users SET points = points + 10 WHERE name = "${el}"\n`
+                    updateTheseQuery.push(response[0]['id'])
+                }
+                if (response.length === 0) {
+                    insertTheseQuery.push(`("${el}", 10)`)
+                }
+            }
+            
+            // TODO: Limit these to 50 elements per query... at some point.
+            if (insertTheseQuery.length === 0) {
+                console.log(`No new users.`)
+            } else {
+                // Insert all new users.
+                const response = await new Promise((resolve, reject) => {
+                    const query = `INSERT INTO users (name, points)\nVALUES\n${insertTheseQuery.join(',\n')};`
+                    connection.query(query, (err, results) => {
+                        if (err) reject(new Error(err.message))
+                        resolve(results)
+                    })
+                })
+                console.log(`${insertTheseQuery.length} new users created.`)
+            }
+            
+            if (updateTheseQuery.length === 0) {
+                console.log(`No users to update.`)
+            } else {
+                // Update all existing users.
+                const response = await new Promise((resolve, reject) => {
+                    const query = `UPDATE users SET points = points + 10 WHERE id IN (${updateTheseQuery.join(', ')})`
+                    connection.query(query, (err, results) => {
+                        if (err) reject(new Error(err.message))
+                        resolve(results)
+                    })
+                })
+                // console.log(`UPDATE users SET points = points + 10 WHERE id IN (${updateTheseQuery.join(', ')})`)
+                console.log(`${updateTheseQuery.length} entries update.`)
+            }
+            
+            
         } catch (err) {console.log(err)}
     }
 }
