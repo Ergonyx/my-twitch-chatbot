@@ -22,22 +22,6 @@ class DbService {
     static getDbServiceInstance() {
         return instance ? instance : new DbService()
     }
-    async getAllData() {
-        try {
-            console.log("Getting ALL data.")
-            const response = await new Promise((resolve, reject) => {
-                const query = "SELECT * FROM users;"
-                connection.query(query, (err, results) => {
-                    if (err) reject(new Error(err.message))
-                    resolve(results)
-                })
-            })
-            // console.log(response)
-            return response;
-        } catch (err) {
-            console.log(err)
-        }
-    }
     async getTop10() {
         try {
             console.log("Retrieving Top 10.")
