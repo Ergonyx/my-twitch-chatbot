@@ -112,6 +112,10 @@ class DbService {
     // NOTE: Based on my reading about doing multi-row statements and the benchmarks I've seen I've decided that this will likely send up to 50 rows (max) at a time as that achieves similar numbers to doing 10000 at a time.
     async batchTest(list) {
         try {
+            if (list.length === 0) {
+                console.log("Received nothing so doing nothing.")
+                return; // If it received nothing, do nothing.  Should probably just have the other thing not send anything...
+            } 
             // scope variables
             let updateTheseQuery = []
             let insertTheseQuery = []
@@ -127,6 +131,7 @@ class DbService {
                 })
                 if (response.length > 0) {
                     // updateTheseQuery += `UPDATE users SET points = points + 10 WHERE name = "${el}"\n`
+                    // TODO: In these array pushes I can push the username to a cached array so as to avoid searching for the same user every time.
                     updateTheseQuery.push(response[0]['id'])
                 }
                 if (response.length === 0) {
@@ -146,7 +151,6 @@ class DbService {
                         resolve(results)
                     })
                 })
-                console.log(`${insertTheseQuery.length} new users created.`)
             }
             
             if (updateTheseQuery.length === 0) {
@@ -161,9 +165,8 @@ class DbService {
                     })
                 })
                 // console.log(`UPDATE users SET points = points + 10 WHERE id IN (${updateTheseQuery.join(', ')})`)
-                console.log(`${updateTheseQuery.length} entries update.`)
             }
-            
+            console.log(`Added 10 points to ${updateTheseQuery.length} users and created ${insertTheseQuery.length} new users`);
             
         } catch (err) {console.log(err)}
     }

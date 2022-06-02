@@ -30,20 +30,21 @@ const client = new tmi.Client({
     username: `${process.env.TTV_USERNAME}`,
     password: `oauth:${process.env.TTV_ACCESS}`,
   },
-  channels: [`${process.env.TTV_CHANNEL}`, 'Trainwreckstv', 'loltyler1', 'BruceDropEmOff', 'aceu', 'summit1g', 'MOONMOON', 'tarik', 'moistcr1tikal', 'fuslie', 'DisguisedToast', 'shroud', 'daltoosh', 'Duke', 'Emiru', 'ToryLanez', 'LVNDMARK', 'Punz', 'koil', 'BigBossBoze', 'ShahZaM', 'willneff', 'Aydan', 'Jinnytty', 'nl_Kripp', 'MiaMetzMusic', 'DougDougW', 'inokiyan', 'DiazBiffle', 's0mcs', 'Topsonous', 'iateyourpie', 'Tectone', 'tuonto', 'miki', 'Zy0xxx', 'AnthonyZ', 'Gosu', 'GTAWiseGuy', 'QuarterJade', 'UberHaxorNova', 'roflgator', 'Dropped', 'robcdee', 'Nemu', 'fobm4ster', 'Whippy', 'ESL_CSGO', 'cyr', 'BobRoss', 'zwebackhd', 'Zoomaa', 'TheChief1114', 'boxbox', 'kyootbot', 'Euriece', 'Calebhart42', 'kkatamina', 'KYR_SP33DY', 'Rogue', 'Milk', 'supertf', 'Masayoshi', 'GamesDoneQuick', 'Sanchovies', 'Ac7ionMan', 'Skermz', 'Lysium', 'Saintone', 'RealzBlueWater', 'Xlice', 'DatModz', 'CallMeAgent00', 'dish', 'Hungrybox', 'erobb221', 'OhTofu', 'ConnorEatsPants', 'robinsongz', 'sunsetgaiaASMR', 'BigIraq', 'BurkeBlack', 'CDNThe3rd', 'MTashed', 'ATK', 'scoped', 'Aurateur', 'Jenz', 'LilAggy', 'Jessu', 'TFBlade', 'Umbra', 'Quantum', 'Sekapoko', 'DaddyDimmuTV', 'Becca_Qichmond', 'julien', 'MuTeX', 'Sequisha', 'itsHafu', 'AsmodaiTV', 'plaqueboymax', 'Lawlman', 'JOEYKAOTYK', 'LuckyChamu', 'Artosis', 'Payo'], // NOTE: This is an array of channels you want the bot to join.
+  channels: [`${process.env.TTV_CHANNEL}`, ...process.env.TTV_TEST_CHANNELS.split(',')], // NOTE: This is an array of channels you want the bot to join.
 });
 
 // Connect to specified channel using the settings from config and log any errors to the console.
 // TODO: Have errors get logged to an actual file.
 client.connect().catch(console.error);
-msgsPerMin = setInterval(() => {
-  client.say('ergonyx', `${messageCount}`)
-  messageCount = 0
-}, 60000);
+// msgsPerMin = setInterval(() => {
+//   client.say('ergonyx', `${messageCount}`)
+//   messageCount = 0
+// }, 60000);
 // Listen for messages sent by users in the specified channel(s)
 client.on("message", (channel, tags, message, self) => {
   // Prevent the bot from responding to it's own messages.
   if (self) return;
+  if (tags.username === 'nightbot' || tags.username === 'streamelements') return;
 
   // Add user to the activeUsers array to reward with points.
   if (activeUsers.indexOf(tags.username) < 0) {
@@ -153,6 +154,7 @@ client.on("message", (channel, tags, message, self) => {
 
 // Interval to give active chatters 10 points every 10 minutes.
 pointUpdater = setInterval(() => {
+  // TODO: If there's no active users, I don't really need to send an empty array.
   // Cycle through active users and add points.
   axios.patch('http://localhost:5000/v1/points/batch', {activeUsers: activeUsers})
   .then(response => {
